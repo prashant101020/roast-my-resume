@@ -1,6 +1,4 @@
 import type { NextConfig } from "next";
-import path from "path";
-import CopyPlugin from "copy-webpack-plugin";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["pdfjs-dist", "mammoth"],
@@ -12,26 +10,12 @@ const nextConfig: NextConfig = {
   images: {
     domains: [],
   },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      // This is the robust way to find the worker file
-      const workerFilePath = require.resolve("pdfjs-dist/legacy/build/pdf.worker.min.mjs");
-
-      config.plugins.push(
-        new CopyPlugin({
-          patterns: [
-            {
-              from: workerFilePath,
-              // Copy it to the server build directory
-              to: path.resolve(__dirname, ".next/server/"),
-            },
-          ],
-        })
-      );
-    }
-    return config;
+  // Force-include pdfjs-dist worker files in the Vercel serverless bundle.
+  // Vercel's output file tracing misses dynamically-imported worker files,
+  // so we explicitly include them here.
+  outputFileTracingIncludes: {
+    "/api/roast": ["./node_modules/pdfjs-dist/**/*"],
   },
 };
 
 export default nextConfig;
-

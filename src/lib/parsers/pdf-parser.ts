@@ -1,15 +1,9 @@
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
-import path from 'path';
-import { pathToFileURL } from 'url';
 
-// On the server, we need to set the worker source.
-if (typeof window === 'undefined') {
-  // The path is relative to the project root where Next.js runs.
-  // We point to the minified worker file that is copied by our webpack config to .next/server/
-  pdfjs.GlobalWorkerOptions.workerSrc = pathToFileURL(
-    path.join(process.cwd(), '.next/server/pdf.worker.min.mjs')
-  ).toString();
-}
+// On the server, pdfjs-dist is externalized (serverExternalPackages) so it
+// loads directly from node_modules. Its internal "fake worker" fallback
+// dynamically imports the worker from its own directory — no manual
+// workerSrc configuration is needed.
 
 export async function parsePdf(buffer: Buffer): Promise<string> {
   try {
