@@ -38,10 +38,26 @@ export function useRoast(): UseRoastReturn {
         body: formData,
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data: any = null;
+
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (jsonErr) {
+          console.error('[useRoast] Failed to parse JSON response:', jsonErr);
+        }
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to roast resume');
+        throw new Error(
+          data?.error ||
+          `Server returned an error (status ${response.status}). The roast might have timed out or failed on the server.`
+        );
+      }
+
+      if (!data || !data.roast) {
+        throw new Error('Received an invalid or empty response from the server.');
       }
 
       setResult(data.roast);
