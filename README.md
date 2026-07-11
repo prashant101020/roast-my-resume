@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Resume Roast 🔥
 
-## Getting Started
+> Upload your resume. Get emotionally damaged.
 
-First, run the development server:
+**Resume Roast** is a modern AI-powered web app that brutally roasts your resume with savage humor while delivering actionable career advice. Powered by Gemini AI.
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?logo=tailwindcss)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+## ✨ Features
+
+- **🔥 Savage AI Roasts** — Get brutally honest, hilarious feedback on your resume
+- **📊 Fun Metrics** — Buzzword Density, Corporate NPC Score, Tech Bro Delusion Meter
+- **📄 Multi-format Support** — Upload PDF or DOCX resumes
+- **🎯 ATS Score** — See how your resume performs against ATS systems
+- **💡 Actionable Advice** — Every roast comes with a fix
+- **🎨 Premium UI** — Dark mode, glassmorphism, smooth animations
+- **🔌 Multi-LLM Support** — Gemini, Groq, OpenRouter (swap with env vars)
+- **🚀 Vercel Ready** — Deploy in seconds
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- npm
+- A Gemini API key ([Get one free](https://aistudio.google.com/apikey))
+
+### Installation
 
 ```bash
+# Clone the repo
+git clone <your-repo-url>
+cd resume-roast
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local and add your GEMINI_API_KEY
+
+# Run the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Required | Description |
+|---|---|---|
+| `GEMINI_API_KEY` | Yes* | Google Gemini API key |
+| `GROQ_API_KEY` | No | Groq API key (alternative) |
+| `OPENROUTER_API_KEY` | No | OpenRouter API key (alternative) |
+| `NEXT_PUBLIC_APP_URL` | No | App URL (defaults to localhost:3000) |
 
-## Learn More
+\* At least one LLM API key is required.
 
-To learn more about Next.js, take a look at the following resources:
+## 🏗️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Category | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| UI Components | shadcn/ui |
+| Animations | Framer Motion |
+| Resume Parsing | pdf-parse, mammoth |
+| AI/LLM | Google Gemini (primary), Groq, OpenRouter |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📁 Project Structure
 
-## Deploy on Vercel
+```
+src/
+├── app/
+│   ├── api/roast/          # AI roast API endpoint
+│   ├── roast/              # Upload & results page
+│   ├── globals.css         # Design system & custom styles
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx            # Landing page
+├── components/
+│   ├── landing/            # Landing page components
+│   ├── results/            # Roast results components
+│   ├── shared/             # Shared animated components
+│   ├── ui/                 # shadcn/ui primitives
+│   └── upload/             # File upload components
+├── hooks/
+│   └── use-roast.ts        # Main roast flow hook
+└── lib/
+    ├── llm/                # LLM abstraction layer
+    │   ├── provider.ts     # Provider interface & factory
+    │   ├── gemini.ts       # Gemini implementation
+    │   ├── groq.ts         # Groq implementation
+    │   ├── openrouter.ts   # OpenRouter implementation
+    │   └── prompts.ts      # System prompts
+    ├── parsers/            # Resume parsing
+    ├── validators/         # File validation
+    ├── types.ts            # TypeScript interfaces
+    └── utils.ts            # Utilities
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚢 Deploy to Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
+1. Push your code to GitHub
+2. Import the repo on [Vercel](https://vercel.com)
+3. Add your `GEMINI_API_KEY` in Vercel Environment Variables
+4. Deploy!
+
+> **Note:** The `/api/roast` endpoint uses `maxDuration = 60` for Vercel serverless functions. On the free tier, the max is 10 seconds — you may need the Pro plan for reliable roast generation.
+
+## 🔒 Security
+
+- Files are processed in-memory only (never written to disk)
+- MIME type + magic byte validation on uploads
+- Server-side file size limits (5MB max)
+- API keys are server-side only, never exposed to the client
+- Prompt injection protection via structured prompts
+
+## 📄 License
+
+MIT License — go ship something amazing! 🚀
