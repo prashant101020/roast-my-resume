@@ -5,6 +5,7 @@ import { parseDocx } from '@/lib/parsers/docx-parser';
 import { extractResumeData } from '@/lib/parsers/resume-extractor';
 import { getLLMProvider } from '@/lib/llm/provider';
 
+export const runtime = 'nodejs'; // Force Node.js runtime
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
