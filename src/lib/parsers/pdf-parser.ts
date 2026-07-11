@@ -1,5 +1,10 @@
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
-import 'pdfjs-dist/legacy/build/pdf.worker.mjs';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.js';
+
+if (typeof window === 'undefined') {
+  const { Worker } = require('worker_threads');
+  pdfjs.GlobalWorkerOptions.workerPort = new Worker(pdfjsWorker);
+}
 
 export async function parsePdf(buffer: Buffer): Promise<string> {
   try {
