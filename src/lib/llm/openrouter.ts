@@ -3,6 +3,22 @@ import { LLMProvider } from './provider';
 import { ParsedResume, RoastResult } from '@/lib/types';
 import { RESUME_EXTRACTION_PROMPT, ROAST_SYSTEM_PROMPT, buildRoastUserPrompt } from './prompts';
 
+// Helper function to find and parse JSON from a string
+function extractAndParseJson<T>(text: string): T {
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonMatch && jsonMatch[0]) {
+    try {
+      return JSON.parse(jsonMatch[0]) as T;
+    } catch (error) {
+      throw new Error('Failed to parse the extracted JSON object.');
+    }
+  }
+  if (text.trim().startsWith('{')) {
+    return JSON.parse(text.trim()) as T;
+  }
+  throw new Error('No JSON object found in the response text.');
+}
+
 export class OpenRouterProvider implements LLMProvider {
   name = 'openrouter';
   private client: OpenAI;
@@ -24,42 +40,46 @@ export class OpenRouterProvider implements LLMProvider {
     const { rawText, ...resumeData } = resume;
     const userPrompt = buildRoastUserPrompt(resumeData as unknown as Record<string, unknown>);
 
-    const completion = await this.client.chat.completions.create({
-      model: 'meta-llama/llama-3.3-70b-instruct',
-      messages: [
-        { role: 'system', content: ROAST_SYSTEM_PROMPT },
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.9,
-      max_tokens: 4096,
-    });
-
-    const text = completion.choices[0]?.message?.content ?? '';
     try {
-      const cleaned = text.replace(/^```(?:json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
-      return JSON.parse(cleaned) as RoastResult;
-    } catch {
-      throw new Error('Failed to parse roast response from OpenRouter.');
+      const completion = await this.client.chat.completions.create({
+        // Using OpenRouter's auto-routing model for free-tier reliability
+        model: 'openrouter/auto',
+        messages: [
+          { role: 'system', content: ROAST_SYSTEM_PROMPT },
+          { role: 'user', content: userPrompt },
+        ],
+        temperature: 0.9,
+        max_tokens: 4096,
+      });
+
+      const text = completion.choices[0]?.message?.content ?? '';
+      return extractAndParseJson<RoastResult>(text);
+    } catch (error) {
+      console.error("Failed to get roast from OpenRouter. Error:", error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to get roast from OpenRouter. Reason: ${message}`);
     }
   }
 
   async extractResume(rawText: string): Promise<Omit<ParsedResume, 'rawText'>> {
-    const completion = await this.client.chat.completions.create({
-      model: 'meta-llama/llama-3.3-70b-instruct',
-      messages: [
-        { role: 'system', content: RESUME_EXTRACTION_PROMPT },
-        { role: 'user', content: `Resume text:\n${rawText}` },
-      ],
-      temperature: 0.1,
-      max_tokens: 4096,
-    });
-
-    const text = completion.choices[0]?.message?.content ?? '';
     try {
-      const cleaned = text.replace(/^```(?:json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
-      return JSON.parse(cleaned);
-    } catch {
-      throw new Error('Failed to parse resume extraction from OpenRouter.');
+      const completion = await this.client.chat.completions.create({
+        // Using OpenRouter's auto-routing model for free-tier reliability
+        model: 'openrouter/auto',
+        messages: [
+          { role: 'system', content: RESUME_EXTRACTION_PROMPT },
+          { role: 'user', content: `Resume text:\n${rawText}` },
+        ],
+        temperature: 0.1,
+        max_tokens: 4096,
+      });
+
+      const text = completion.choices[0]?.message?.content ?? '';
+      return extractAndParseJson<Omit<ParsedResume, 'rawText'>>(text);
+    } catch (error) {
+      console.error("Failed to extract resume data from OpenRouter. Error:", error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to extract resume data from OpenRouter. Reason: ${message}`);
     }
   }
 }
