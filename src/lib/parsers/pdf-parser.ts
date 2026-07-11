@@ -1,13 +1,13 @@
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
-
-// On the server, we need to set the worker source.
-// This is a common pattern for using pdf.js in a Node.js environment.
-if (typeof window === 'undefined') {
-  pdfjs.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs';
-}
-
 export async function parsePdf(buffer: Buffer): Promise<string> {
   try {
+    // Dynamically import pdfjs-dist
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+
+    // On the server, we need to set the worker source.
+    if (typeof window === 'undefined') {
+      pdfjs.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs';
+    }
+
     const uint8Array = new Uint8Array(buffer);
     const doc = await pdfjs.getDocument({
       data: uint8Array,
