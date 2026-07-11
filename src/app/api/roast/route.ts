@@ -1,3 +1,4 @@
+import '@/lib/polyfills'; // Must be the first import
 import { NextRequest, NextResponse } from 'next/server';
 import { validateServerFile, getFileTypeFromBuffer } from '@/lib/validators/file-validator';
 import { parsePdf } from '@/lib/parsers/pdf-parser';
